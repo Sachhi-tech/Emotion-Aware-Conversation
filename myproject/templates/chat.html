@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emotion-Aware Conversation System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 min-h-screen font-sans text-slate-100 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="w-full border-b border-slate-800/80 bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="h-10 w-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/30">
+                    <i class="fa-solid fa-brain text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight tracking-wide text-white">Sentience AI</h1>
+                    <p class="text-xs text-indigo-300">Emotion-Aware Conversation System</p>
+                </div>
+            </div>
+            <span class="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span> Engine Active
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 py-8 flex-grow w-full">
+        
+        <!-- Input Card -->
+        <div class="glass rounded-2xl p-6 md:p-8 shadow-2xl mb-8 transition-all">
+            <div class="mb-5">
+                <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-feather-pointed text-indigo-600"></i> Analyze Context & Emotion
+                </h2>
+                <p class="text-sm text-slate-600 mt-1">Type or paste any text snippet. The system will predict the sentiment and formulate a tone-matched response.</p>
+            </div>
+
+            <form method="POST" id="chat-form" class="space-y-4">
+                {% csrf_token %}
+                
+                <div class="relative">
+                    <textarea 
+                        name="user_text" 
+                        rows="4" 
+                        class="w-full p-4 rounded-xl border border-slate-200 bg-white/80 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all shadow-inner text-base resize-y" 
+                        placeholder="Express how you are feeling or paste a conversation line..." 
+                        required>{{ user_text }}</textarea>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <span class="text-xs text-slate-500 font-medium hidden sm:inline-block">
+                        <i class="fa-solid fa-shield-halved text-indigo-500 mr-1"></i> Fast Inference Enabled
+                    </span>
+
+                    <button 
+                        type="submit" 
+                        id="submit-btn" 
+                        class="w-full sm:w-auto px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white font-medium text-sm transition-all shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 group cursor-pointer">
+                        <span id="btn-text">Analyze & Generate Response</span>
+                        <i class="fa-solid fa-paper-plane text-xs transition-transform group-hover:translate-x-1" id="btn-icon"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Display Results -->
+        {% if bot_response %}
+        <div class="space-y-6 animate-fade-in">
+            
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold text-slate-200 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-indigo-400"></i> Pipeline Output
+                </h3>
+                <span class="text-xs text-slate-400">Processed successfully</span>
+            </div>
+
+            <!-- Grid Layout for Metadata & Response -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- Left Column: Metrics Card -->
+                <div class="md:col-span-1 space-y-4">
+                    <!-- Emotion Badge Card -->
+                    <div class="glass rounded-2xl p-5 border border-slate-700/50 bg-slate-900/60 shadow-lg">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2">Predicted Emotion</span>
+                        
+                        <div class="flex items-center justify-between">
+                            <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-bold capitalize bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                <i class="fa-solid fa-face-smile text-indigo-400"></i> {{ emotion }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Confidence Score Card -->
+                    <div class="glass rounded-2xl p-5 border border-slate-700/50 bg-slate-900/60 shadow-lg">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">Confidence Rating</span>
+                        
+                        <div class="flex items-baseline justify-between mb-2">
+                            <span class="text-2xl font-extrabold text-white">{{ confidence }}</span>
+                        </div>
+
+                        <!-- Progress Bar (Assuming confidence score range 0.0 - 1.0 or percentage) -->
+                        <div class="w-full bg-slate-700/50 rounded-full h-2 overflow-hidden">
+                            <div class="bg-indigo-500 h-2 rounded-full transition-all duration-500" style="width: calc({{ confidence }} * 100%)"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Conversation Card -->
+                <div class="md:col-span-2 space-y-4">
+                    
+                    <!-- Original User Input -->
+                    <div class="bg-slate-800/60 border border-slate-700/50 rounded-2xl p-5 backdrop-blur-sm">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-2">Your Input</span>
+                        <p class="text-slate-200 text-sm leading-relaxed italic">"{{ user_text }}"</p>
+                    </div>
+
+                    <!-- Generated Response -->
+                    <div class="bg-indigo-950/40 border border-indigo-500/30 rounded-2xl p-6 backdrop-blur-sm shadow-xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
+                        
+                        <div class="flex items-center gap-2 mb-3 text-indigo-400 font-medium text-xs uppercase tracking-wider">
+                            <i class="fa-solid fa-robot"></i> Generated Response
+                        </div>
+                        
+                        <p class="text-slate-100 text-base leading-relaxed font-normal">
+                            {{ bot_response }}
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+        {% endif %}
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full border-t border-slate-800/80 py-4 text-center text-xs text-slate-500">
+        Emotion-Aware Conversation System &bull; Powered by PyTorch & Transformers
+    </footer>
+
+    <!-- Button Loading Spinner Logic -->
+    <script>
+        const form = document.getElementById('chat-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+        const btnIcon = document.getElementById('btn-icon');
+
+        form.addEventListener('submit', function() {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            btnText.textContent = 'Processing Text...';
+            btnIcon.className = 'fa-solid fa-circle-notch fa-spin text-xs';
+        });
+    </script>
+</body>
+</html>
