@@ -6,6 +6,7 @@ def chat_view(request):
 
     if request.method == "POST":
         user_text = request.POST.get("user_text", "").strip()
+        
 
         if user_text:
             # Run model pipeline
